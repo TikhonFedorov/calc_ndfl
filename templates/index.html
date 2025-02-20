@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Калькулятор зарплаты</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+      // Функция для динамического скрытия/показа полей KPI
+      function toggleKPIFields() {
+          var checkbox = document.getElementById("has_kpi");
+          var kpiFields = document.getElementById("kpi_fields");
+          kpiFields.style.display = checkbox.checked ? "block" : "none";
+      }
+
+      // Функция для переключения темы (светлая/тёмная) с сохранением в localStorage
+      function toggleTheme() {
+          document.body.classList.toggle("dark");
+          localStorage.setItem("darkTheme", document.body.classList.contains("dark"));
+      }
+
+      // При загрузке страницы восстанавливаем выбранную тему и настраиваем KPI поля
+      window.onload = function() {
+          if (localStorage.getItem("darkTheme") === "true") {
+              document.body.classList.add("dark");
+          } else {
+              document.body.classList.remove("dark");
+          }
+          toggleKPIFields();
+      }
+    </script>
+</head>
+<body>
+    <!-- Кнопка для смены темы -->
+    <button class="theme-toggle" onclick="toggleTheme()">Сменить тему</button>
+    <h1>Калькулятор зарплаты</h1>
+    {% if error %}
+    <p class="error">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+        <div>
+            <label for="base_salary">Оклад:</label>
+            <input type="text" id="base_salary" name="base_salary" value="{{ form_data.base_salary }}" required>
+        </div>
+        <div>
+            <label for="fixed_bonus">Фиксированная премия:</label>
+            <input type="text" id="fixed_bonus" name="fixed_bonus" value="{{ form_data.fixed_bonus }}">
+        </div>
+        <div>
+            <input type="checkbox" id="has_kpi" name="has_kpi" onclick="toggleKPIFields()" {% if form_data.has_kpi %}checked{% endif %}>
+            <label for="has_kpi">Есть премия за KPI</label>
+        </div>
+        <div id="kpi_fields" style="display: none;">
+            <div>
+                <label for="kpi_percentage">Процент KPI премии:</label>
+                <input type="text" id="kpi_percentage" name="kpi_percentage" value="{{ form_data.kpi_percentage }}" placeholder="Например, 10">
+            </div>
+            <div>
+                <label for="period_months">Период выплаты KPI:</label>
+                <select id="period_months" name="period_months">
+                    <option value="3" {% if form_data.period_months == '3' %}selected{% endif %}>Квартал (3 месяца)</option>
+                    <option value="6" {% if form_data.period_months == '6' %}selected{% endif %}>Полгода (6 месяцев)</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit">Рассчитать</button>
+    </form>
+    {% if result_without_kpi is not none %}
+    <div class="result">
+        <h2>Результаты расчёта:</h2>
+        <p>
+            <strong>Без учета KPI премии:</strong><br>
+            Доход "на руки": {{ result_without_kpi | round(2) }} руб.<br>
+            Расчёт по ставкам: {{ tax_info_without_kpi }}
+        </p>
+        {% if form_data.has_kpi %}
+        <p>
+            <strong>С учетом KPI премии:</strong><br>
+            Доход "на руки": {{ result_with_kpi | round(2) }} руб.<br>
+            Расчёт по ставкам: {{ tax_info_with_kpi }}
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+</body>
+</html>
