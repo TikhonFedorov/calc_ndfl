@@ -18,6 +18,13 @@
           localStorage.setItem("darkTheme", document.body.classList.contains("dark"));
       }
 
+      function clearResults() {
+        var results = document.querySelector('.result');
+        if(results) {
+            results.innerHTML = '';
+        }
+      }
+
       // При загрузке страницы восстанавливаем выбранную тему и настраиваем KPI поля
       window.onload = function() {
           if (localStorage.getItem("darkTheme") === "true") {
@@ -38,24 +45,24 @@
     {% endif %}
     <form method="post">
         <div>
-            <label for="base_salary">Оклад:</label>
+            <label for="base_salary">Доход (ежемесячный оклад):</label>
             <input type="text" id="base_salary" name="base_salary" value="{{ form_data.base_salary }}" required>
         </div>
         <div>
-            <label for="fixed_bonus">Фиксированная премия:</label>
+            <label for="fixed_bonus">Доход (ежемесячная премия)</label>
             <input type="text" id="fixed_bonus" name="fixed_bonus" value="{{ form_data.fixed_bonus }}">
         </div>
         <div>
+            <label for="has_kpi">Премия за выполнение KPI</label>
             <input type="checkbox" id="has_kpi" name="has_kpi" onclick="toggleKPIFields()" {% if form_data.has_kpi %}checked{% endif %}>
-            <label for="has_kpi">Есть премия за KPI</label>
         </div>
         <div id="kpi_fields" style="display: none;">
             <div>
-                <label for="kpi_percentage">Процент KPI премии:</label>
+                <label for="kpi_percentage">Процент KPI:</label>
                 <input type="text" id="kpi_percentage" name="kpi_percentage" value="{{ form_data.kpi_percentage }}" placeholder="Например, 10">
             </div>
             <div>
-                <label for="period_months">Период выплаты KPI:</label>
+                <label for="period_months">Периодичность KPI:</label>
                 <select id="period_months" name="period_months">
                     <option value="3" {% if form_data.period_months == '3' %}selected{% endif %}>Квартал (3 месяца)</option>
                     <option value="6" {% if form_data.period_months == '6' %}selected{% endif %}>Полгода (6 месяцев)</option>
@@ -68,15 +75,15 @@
     <div class="result">
         <h2>Результаты расчёта:</h2>
         <p>
-            <strong>Без учета KPI премии:</strong><br>
-            Доход "на руки": {{ result_without_kpi | round(2) }} руб.<br>
-            Расчёт по ставкам: {{ tax_info_without_kpi }}
+            <strong>Без учета KPI:</strong><br>
+            Доход "на руки" в месяц: {{ result_without_kpi | round(2) }} руб.<br>
+            Расчёт по ставкам НДФЛ: {{ tax_info_without_kpi }}
         </p>
         {% if form_data.has_kpi %}
         <p>
-            <strong>С учетом KPI премии:</strong><br>
-            Доход "на руки": {{ result_with_kpi | round(2) }} руб.<br>
-            Расчёт по ставкам: {{ tax_info_with_kpi }}
+            <strong>С учетом KPI:</strong><br>
+            Доход "на руки" в месяц: {{ result_with_kpi | round(2) }} руб.<br>
+            Расчёт по ставкам НДФЛ: {{ tax_info_with_kpi }}
         </p>
         {% endif %}
     </div>
