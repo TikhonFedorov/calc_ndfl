@@ -18,11 +18,12 @@
           localStorage.setItem("darkTheme", document.body.classList.contains("dark"));
       }
 
+      // Очистка блока результатов перед отправкой формы
       function clearResults() {
-        var results = document.querySelector('.result');
-        if(results) {
-            results.innerHTML = '';
-        }
+          var results = document.querySelector('.result');
+          if(results) {
+              results.innerHTML = '';
+          }
       }
 
       // При загрузке страницы восстанавливаем выбранную тему и настраиваем KPI поля
@@ -33,6 +34,11 @@
               document.body.classList.remove("dark");
           }
           toggleKPIFields();
+          // Навешиваем обработчик на отправку формы
+          var form = document.querySelector('form');
+          form.addEventListener('submit', function(event) {
+              clearResults();
+          });
       }
     </script>
 </head>
@@ -49,7 +55,7 @@
             <input type="text" id="base_salary" name="base_salary" value="{{ form_data.base_salary }}" required>
         </div>
         <div>
-            <label for="fixed_bonus">Доход (ежемесячная премия)</label>
+            <label for="fixed_bonus">Доход (ежемесячная премия):</label>
             <input type="text" id="fixed_bonus" name="fixed_bonus" value="{{ form_data.fixed_bonus }}">
         </div>
         <div>
@@ -75,15 +81,17 @@
     <div class="result">
         <h2>Результаты расчёта:</h2>
         <p>
-            <strong>Без учета KPI:</strong><br>
-            Доход "на руки" в месяц: {{ result_without_kpi | round(2) }} руб.<br>
-            Расчёт по ставкам НДФЛ: {{ tax_info_without_kpi }}
+            <strong>Без учета KPI премии:</strong><br>
+            Доход "на руки"(в месяц): {{ result_without_kpi | round(2) }} руб.<br>
+            Годовой доход "на руки": {{ yearly_without_kpi | round(2) }} руб.<br>
+            Расчёт по ставкам: {{ tax_info_without_kpi }}
         </p>
         {% if form_data.has_kpi %}
         <p>
-            <strong>С учетом KPI:</strong><br>
-            Доход "на руки" в месяц: {{ result_with_kpi | round(2) }} руб.<br>
-            Расчёт по ставкам НДФЛ: {{ tax_info_with_kpi }}
+            <strong>С учетом KPI премии:</strong><br>
+            Доход "на руки"(в месяц): {{ result_with_kpi | round(2) }} руб.<br>
+            Годовой доход "на руки": {{ yearly_with_kpi | round(2) }} руб.<br>
+            Расчёт по ставкам: {{ tax_info_with_kpi }}
         </p>
         {% endif %}
     </div>
